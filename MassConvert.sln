@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MassConvert", "MassConvert\MassConvert.fsproj", "{A5795D49-3C5E-4038-B9BE-DEDCC4B37146}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MassConvert.Core", "MassConvert.Core\MassConvert.Core.fsproj", "{17902466-567C-4C0C-BE39-EA85A4E4AC17}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FunToolbox", "FunToolbox\FunToolbox\FunToolbox.fsproj", "{060C0C2C-97C5-46BB-A139-464225480840}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A5795D49-3C5E-4038-B9BE-DEDCC4B37146}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5795D49-3C5E-4038-B9BE-DEDCC4B37146}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5795D49-3C5E-4038-B9BE-DEDCC4B37146}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5795D49-3C5E-4038-B9BE-DEDCC4B37146}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17902466-567C-4C0C-BE39-EA85A4E4AC17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17902466-567C-4C0C-BE39-EA85A4E4AC17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17902466-567C-4C0C-BE39-EA85A4E4AC17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17902466-567C-4C0C-BE39-EA85A4E4AC17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{060C0C2C-97C5-46BB-A139-464225480840}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{060C0C2C-97C5-46BB-A139-464225480840}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{060C0C2C-97C5-46BB-A139-464225480840}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{060C0C2C-97C5-46BB-A139-464225480840}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,3 @@
+[submodule "FunToolbox"]
+	path = FunToolbox
+	url = git@github.com:pragmatrix/FunToolbox.git
