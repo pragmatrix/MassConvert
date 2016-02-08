@@ -9,7 +9,12 @@ module Scanner =
         path: Path
         files: FileName list
         directories: DirectoryName list
-    }
+    } with
+        static member empty path = {
+                path = path
+                files = []
+                directories = []
+            }   
 
     /// Returns the files and directories that are contained in the given directory. The files are filtered by 
     /// the glob pattern
