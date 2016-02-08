@@ -57,6 +57,7 @@
     <Compile Include="Diff.fs" />
     <Compile Include="JobCreator.fs" />
     <Compile Include="Director.fs" />
+    <Compile Include="Player.fs" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

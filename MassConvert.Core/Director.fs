@@ -1,7 +1,10 @@
 ﻿namespace MassConvert.Core
 
+open FunToolbox.FileSystem
+
 open JobCreator
 
+/// Orders jobs and converts them to actions
 module Director =
     
     let shouldProcessBottomUp job = 
@@ -13,7 +16,7 @@ module Director =
     let shouldProcessTopDown job = not (shouldProcessBottomUp job)
 
     let filterJobs f (names, jobs) = names, jobs |> List.filter f
-    let isNotEmpty (names, jobs : _ list) = jobs.IsEmpty |> not
+    let isNotEmpty (_, jobs : _ list) = jobs.IsEmpty |> not
 
     type Composition = {
         environment: JobEnvironment
@@ -44,6 +47,28 @@ module Director =
             jobs = bottomUp @ topDown
         }
     
+    type Action = 
+        | TryRemoveFile of Path        
+        | TryRemoveDir of Path
+        | ConvertCommand of inputFile: Path * outputFile: Path
 
+    let compositionToActions (composition: Composition) = 
+        let environment = composition.environment
 
+        [
+            for (fragments, jobs) in composition.jobs do
+                let src = fragments.path environment.source
+                let dst = fragments.path environment.destination
+                for job in jobs do
+                    yield
+                        match job with
+                        | PurgeDirectory dn -> 
+                            TryRemoveDir (dst |> Path.extend dn.value)
+                        | PurgeFile fn -> 
+                            TryRemoveFile (dst |> Path.extend fn.string)
+                        | ConvertFile (stem, srcExt, dstExt) -> 
+                            ConvertCommand (src |> Path.extend (stem + srcExt.value), dst |> Path.extend (stem + dstExt.value))
+        ]
+            
+          
     

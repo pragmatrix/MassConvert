@@ -3,6 +3,7 @@
 open System.IO
 open FunToolbox.FileSystem
 
+/// Scans directories for files and sub directories.
 module Scanner = 
 
     type DirectoryScanResult = {

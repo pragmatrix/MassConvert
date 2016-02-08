@@ -57,14 +57,16 @@ module Main =
         let currentDir = Path.currentDirectory()
         let startupArgs = StartupArguments.fromCommandLine currentDir argv
         let config = startupArgs |> readConfiguration
-        let composition = 
+        let actions = 
             JobTree.forDirectory config config.source.path config.destination.path
             |> Director.composeFromJobTree
+            |> Director.compositionToActions
 
         match startupArgs.mode with
         | Mode.DryRun ->
-            composition.print()
-            |> Seq.iter (printfn "%s")
+            let player = Player.dryPlayer config.command.template
+            let results = actions |> Player.play player
+            results |> Seq.iter (printfn "%s")
         | Mode.Convert ->
             failwithf "--convert unsupported right now."
         | _ -> failwith "internal error"

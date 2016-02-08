@@ -8,6 +8,7 @@ open FunToolbox.FileSystem
 open Scanner
 open Diff
 
+/// Creates jobs.
 module JobCreator = 
 
     type Job = 

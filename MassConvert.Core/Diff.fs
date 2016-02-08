@@ -4,6 +4,7 @@ open FunToolbox.FileSystem
 
 open Scanner
 
+/// Finds out what to do by comparing filename stems.
 module Diff = 
 
     type 'e setdiff = {
