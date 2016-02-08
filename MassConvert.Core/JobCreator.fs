@@ -16,7 +16,10 @@ module JobCreator =
         | ConvertFile of stem: string * srcExt: FileExtension * dstExt: FileExtension
         with 
         member this.string =
-            this |> sprintf "%A" 
+            match this with
+            | PurgeDirectory dn -> "purge   " + dn.value + " (dir)"
+            | PurgeFile fn -> "purge   " + fn.string
+            | ConvertFile (stem, srcExt, dstExt) -> sprintf "convert %s%s -> %s%s" stem srcExt.value stem dstExt.value
         member this.isRequired (mode: PurgeMode) = 
             match this with
             | PurgeDirectory _
@@ -40,7 +43,7 @@ module JobCreator =
 
     [<CR(ModuleSuffix)>]
     module JobList = 
-        let fromDiff (diff: ScanResultDiff) = 
+        let fromDiff (destExt: FileExtension) (diff: ScanResultDiff) = 
 
             // we want to get rid of stuff not required first.
 
@@ -57,7 +60,7 @@ module JobCreator =
 
             let updateFiles =
                 diff.filesStemDiff.add @ diff.filesStemDiff.update
-                |> List.map (fun stem -> ConvertFile(stem, diff.sourceFiles.extension stem, diff.destinationFiles.extension stem))
+                |> List.map (fun stem -> ConvertFile(stem, diff.sourceFiles.extension stem, destExt))
                 
             let jobs = 
                 [removeDirs; removeFiles; updateFiles]
@@ -73,9 +76,9 @@ module JobCreator =
                 nested = diff.directoriesDiff.add @ diff.directoriesDiff.update
             }
 
-        let fromScanResults (source: DirectoryScanResult) (destination: DirectoryScanResult) : JobList = 
+        let fromScanResults (destExt: FileExtension) (source: DirectoryScanResult) (destination: DirectoryScanResult) : JobList = 
             Diff.diffScanResults source destination
-            |> fromDiff
+            |> fromDiff destExt
 
         let private removeJobsIfFilesHaveTheSameDate (list: JobList) = 
             let jobFilter =
@@ -83,9 +86,11 @@ module JobCreator =
                 | ConvertFile (stem, srcExt, dstExt) ->
                     let src = list.mkSourcePath stem srcExt
                     let dst = list.mkDestinationPath stem dstExt
-                    File.GetLastWriteTimeUtc(src.value)
-                    <>
-                    File.GetLastWriteTimeUtc(dst.value)
+                    // GetLastWriteTimeUtc(): 
+                    // https://msdn.microsoft.com/en-us/library/system.io.file.getlastwritetimeutc(v=vs.110).aspx
+                    // If the file described in the path parameter does not exist, this method returns 12:00 midnight, January 1, 1601 A.D. (C.E.) Coordinated Universal Time (UTC).
+                    // which is fine for us.
+                    File.GetLastWriteTimeUtc(src.value) > File.GetLastWriteTimeUtc(dst.value)
                 | _ -> true
             
             { list with jobs = list.jobs |> List.filter jobFilter }
@@ -103,7 +108,7 @@ module JobCreator =
                 if not <| Directory.Exists(destination.value) 
                 then Scanner.DirectoryScanResult.empty destination
                 else Scanner.scanDirectory destination (configuration.destination.extension |> GlobPattern.forExtension)
-            fromScanResults sourceContents destinationContents
+            fromScanResults configuration.destination.extension sourceContents destinationContents
             |> removeJobsIfFilesHaveTheSameDate
             |> removeJobsAccordingToPurgeMode configuration.destination.purge
 
@@ -115,6 +120,7 @@ module JobCreator =
             let rec topDown this (fragments: Fragments) = 
                 [
                     yield fragments, this.list.jobs
+                        
                     for (name, tree) in this.nested do
                         yield! topDown tree (fragments.push name)
                 ]

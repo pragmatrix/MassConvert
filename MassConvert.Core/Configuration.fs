@@ -22,6 +22,7 @@ type FileName = FileName of stem: string * ext: string
     member this.value = let (FileName (stem, ext)) = this in (stem, ext)
     member this.nameWithoutExtension = this.value |> fst
     member this.extension = this.value |> snd
+    member this.string = this.nameWithoutExtension + this.extension
     static member parse str = 
         let stem = Path.GetFileNameWithoutExtension(str)
         let ext = Path.GetExtension(str)
