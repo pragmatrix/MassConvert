@@ -5,14 +5,14 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>a5795d49-3c5e-4038-b9be-dedcc4b37146</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>MassConvert</RootNamespace>
-    <AssemblyName>MassConvert</AssemblyName>
+    <ProjectGuid>cfc46218-9c2c-405f-beeb-4966de6d54c7</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>MassConvert.Tests</RootNamespace>
+    <AssemblyName>MassConvert.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
-    <Name>MassConvert</Name>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Name>MassConvert.Tests</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,9 +22,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\MassConvert.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\Debug\MassConvert.Tests.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,9 +31,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\MassConvert.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\Release\MassConvert.Tests.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -55,36 +51,45 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Program.fs" />
-    <None Include="App.config" />
+    <Compile Include="StartupTests.fs" />
+    <None Include="config.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Argu">
-      <HintPath>..\packages\Argu.2.1\lib\net40\Argu.dll</HintPath>
+    <ProjectReference Include="..\MassConvert.Core\MassConvert.Core.fsproj">
+      <Name>MassConvert.Core</Name>
+      <Project>{17902466-567c-4c0c-be39-ea85a4e4ac17}</Project>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="mscorlib" />
+    </ProjectReference>
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
-    <Reference Include="SharpYaml">
-      <HintPath>..\packages\SharpYaml.1.5.3\lib\SharpYaml.dll</HintPath>
+    <Reference Include="FsUnit.NUnit">
+      <HintPath>..\packages\FsUnit.2.0.0\lib\net45\FsUnit.NUnit.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="mscorlib" />
+    <Reference Include="NHamcrest">
+      <HintPath>..\packages\FsUnit.2.0.0\lib\net45\NHamcrest.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.3.0.1\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\FunToolbox\FunToolbox\FunToolbox.fsproj">
       <Name>FunToolbox</Name>
       <Project>{060c0c2c-97c5-46bb-a139-464225480840}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\MassConvert.Core\MassConvert.Core.fsproj">
-      <Name>MassConvert.Core</Name>
-      <Project>{17902466-567c-4c0c-be39-ea85a4e4ac17}</Project>
+    <ProjectReference Include="..\MassConvert\MassConvert.fsproj">
+      <Name>MassConvert</Name>
+      <Project>{a5795d49-3c5e-4038-b9be-dedcc4b37146}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

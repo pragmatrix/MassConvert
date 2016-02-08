@@ -9,6 +9,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MassConvert.Core", "MassCon
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FunToolbox", "FunToolbox\FunToolbox\FunToolbox.fsproj", "{060C0C2C-97C5-46BB-A139-464225480840}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MassConvert.Tests", "MassConvert.Tests\MassConvert.Tests.fsproj", "{CFC46218-9C2C-405F-BEEB-4966DE6D54C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{060C0C2C-97C5-46BB-A139-464225480840}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{060C0C2C-97C5-46BB-A139-464225480840}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{060C0C2C-97C5-46BB-A139-464225480840}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFC46218-9C2C-405F-BEEB-4966DE6D54C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFC46218-9C2C-405F-BEEB-4966DE6D54C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFC46218-9C2C-405F-BEEB-4966DE6D54C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFC46218-9C2C-405F-BEEB-4966DE6D54C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

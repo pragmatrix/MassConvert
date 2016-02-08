@@ -83,8 +83,8 @@ module Entrepeneur =
             { list with jobs = list.jobs |> List.filter jobFilter }
 
         let forDirectory (configuration: Configuration) (source: Path) (destination: Path) : JobList = 
-            let sourceContents = Scanner.scanDirectory source configuration.sourceFilePattern
-            let destinationContents = Scanner.scanDirectory destination (configuration.destinationFileExtension |> GlobPattern.forExtension)
+            let sourceContents = Scanner.scanDirectory source configuration.source.pattern
+            let destinationContents = Scanner.scanDirectory destination (configuration.destination.extension |> GlobPattern.forExtension)
             fromScanResults sourceContents destinationContents
             |> removeJobsIfFilesHaveTheSameDate
 
