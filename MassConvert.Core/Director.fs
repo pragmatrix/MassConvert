@@ -13,6 +13,7 @@ module Director =
     let shouldProcessTopDown job = not (shouldProcessBottomUp job)
 
     let filterJobs f (names, jobs) = names, jobs |> List.filter f
+    let isNotEmpty (names, jobs : _ list) = jobs.IsEmpty |> not
 
     type Composition = {
         environment: JobEnvironment
@@ -29,8 +30,15 @@ module Director =
     let composeFromJobTree (tree: JobTree) = 
         let env = tree.list.environment
         let all = tree.allTopDown
-        let bottomUp = all |> List.rev |> List.map (filterJobs shouldProcessBottomUp)
-        let topDown = all |> List.map (filterJobs shouldProcessTopDown)
+        let bottomUp = 
+            all 
+            |> List.rev 
+            |> List.map (filterJobs shouldProcessBottomUp) 
+            |> List.filter isNotEmpty
+        let topDown = 
+            all 
+            |> List.map (filterJobs shouldProcessTopDown) 
+            |> List.filter isNotEmpty
         {
             environment = env
             jobs = bottomUp @ topDown
