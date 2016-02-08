@@ -95,7 +95,7 @@ type PurgeMode =
         match str with
         | "Removed" -> PurgeRemoved
         | "None" -> PurgeNone
-        | _ -> str |> failwithf "unsupported purge mode: %s"
+        | _ -> str |> failwithf "unsupported purge mode: %s, valid values are 'None' and 'Removed'"
 
 type SourceConfig = {
     path: Path
