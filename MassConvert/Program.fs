@@ -11,6 +11,8 @@ open SharpYaml.Serialization
 
 open MassConvert.Core
 
+open JobCreator
+
 type Arguments = 
     | [<Mandatory>] Config of string
     | Convert
@@ -53,11 +55,19 @@ module Main =
 
     let protectedMain argv = 
         let currentDir = Path.currentDirectory()
-        let config = 
-            StartupArguments.fromCommandLine currentDir argv
-            |> readConfiguration
+        let startupArgs = StartupArguments.fromCommandLine currentDir argv
+        let config = startupArgs |> readConfiguration
+        let composition = 
+            JobTree.forDirectory config config.source.path config.destination.path
+            |> Director.composeFromJobTree
 
-        ()
+        match startupArgs.mode with
+        | Mode.DryRun ->
+            composition.print()
+            |> Seq.iter (printf "%s")
+        | Mode.Convert ->
+            failwithf "--convert unsupported right now."
+        | _ -> failwith "internal error"
 
     [<EntryPoint>]
     let main argv = 

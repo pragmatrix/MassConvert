@@ -8,12 +8,20 @@ open FunToolbox.FileSystem
 open Scanner
 open Diff
 
-module Entrepeneur = 
+module JobCreator = 
 
     type Job = 
-        | MayRemoveDestinationDirectory of DirectoryName
-        | MayRemoveDestinationFile of FileName
+        | PurgeDirectory of DirectoryName
+        | PurgeFile of FileName
         | ConvertFile of stem: string * srcExt: FileExtension * dstExt: FileExtension
+        with 
+        member this.string =
+            this |> sprintf "%A" 
+        member this.isRequired (mode: PurgeMode) = 
+            match this with
+            | PurgeDirectory _
+            | PurgeFile _ -> mode = PurgeRemoved
+            | _ -> true
 
     type JobEnvironment = {
         source: Path
@@ -38,12 +46,12 @@ module Entrepeneur =
 
             let removeDirs = 
                 diff.directoriesDiff.remove
-                |> List.map MayRemoveDestinationDirectory
+                |> List.map PurgeDirectory
 
             let removeFiles = 
                 diff.filesStemDiff.remove
                 |> List.map diff.destinationFiles.filename
-                |> List.map MayRemoveDestinationFile
+                |> List.map PurgeFile
                 
             // then we do update files the files in the current directory
 
@@ -69,7 +77,7 @@ module Entrepeneur =
             Diff.diffScanResults source destination
             |> fromDiff
 
-        let removeJobsIfFilesHaveTheSameDate (list: JobList) = 
+        let private removeJobsIfFilesHaveTheSameDate (list: JobList) = 
             let jobFilter =
                 function 
                 | ConvertFile (stem, srcExt, dstExt) ->
@@ -81,12 +89,19 @@ module Entrepeneur =
                 | _ -> true
             
             { list with jobs = list.jobs |> List.filter jobFilter }
+        
+        let private removeJobsAccordingToPurgeMode (mode: PurgeMode) (list: JobList) = 
+            let jobs =
+                list.jobs
+                |> List.filter (fun j -> j.isRequired mode)
+            { list with jobs = jobs }
 
         let forDirectory (configuration: Configuration) (source: Path) (destination: Path) : JobList = 
             let sourceContents = Scanner.scanDirectory source configuration.source.pattern
             let destinationContents = Scanner.scanDirectory destination (configuration.destination.extension |> GlobPattern.forExtension)
             fromScanResults sourceContents destinationContents
             |> removeJobsIfFilesHaveTheSameDate
+            |> removeJobsAccordingToPurgeMode configuration.destination.purge
 
     type JobTree = {
         list: JobList

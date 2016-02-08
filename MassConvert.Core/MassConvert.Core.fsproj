@@ -55,7 +55,7 @@
     <Compile Include="Text.fs" />
     <Compile Include="Scanner.fs" />
     <Compile Include="Diff.fs" />
-    <Compile Include="Entrepeneur.fs" />
+    <Compile Include="JobCreator.fs" />
     <Compile Include="Director.fs" />
     <Content Include="packages.config" />
   </ItemGroup>

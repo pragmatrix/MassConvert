@@ -1,16 +1,13 @@
 ﻿namespace MassConvert.Core
 
-open System
-open Entrepeneur
-
-open FunToolbox.FileSystem
+open JobCreator
 
 module Director =
     
     let shouldProcessBottomUp job = 
         match job with
-        | MayRemoveDestinationDirectory _
-        | MayRemoveDestinationFile _ -> true
+        | PurgeDirectory _
+        | PurgeFile _ -> true
         | _ -> false
 
     let shouldProcessTopDown job = not (shouldProcessBottomUp job)
@@ -20,7 +17,14 @@ module Director =
     type Composition = {
         environment: JobEnvironment
         jobs: (Fragments * Job list) list
-    }
+    } with
+        member this.print() : string seq = 
+            seq {
+                for (fragments, jobList) in this.jobs do
+                    yield fragments.string + ":"
+                    for job in jobList do
+                        yield "  " + job.string
+            }
 
     let composeFromJobTree (tree: JobTree) = 
         let env = tree.list.environment
