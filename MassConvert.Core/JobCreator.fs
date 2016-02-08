@@ -98,7 +98,11 @@ module JobCreator =
 
         let forDirectory (configuration: Configuration) (source: Path) (destination: Path) : JobList = 
             let sourceContents = Scanner.scanDirectory source configuration.source.pattern
-            let destinationContents = Scanner.scanDirectory destination (configuration.destination.extension |> GlobPattern.forExtension)
+            let destinationContents = 
+                // if the destination directory does not exist, it can be considered empty
+                if not <| Directory.Exists(destination.value) 
+                then Scanner.DirectoryScanResult.empty destination
+                else Scanner.scanDirectory destination (configuration.destination.extension |> GlobPattern.forExtension)
             fromScanResults sourceContents destinationContents
             |> removeJobsIfFilesHaveTheSameDate
             |> removeJobsAccordingToPurgeMode configuration.destination.purge
