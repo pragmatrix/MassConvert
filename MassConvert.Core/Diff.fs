@@ -12,17 +12,18 @@ module Diff =
         add: 'e list
         }
 
+    /// Diff two sets and express the result in remove / update / add steps to get from left to right.
     let private setDiff (left: 'e seq) (right: 'e seq) = 
         let leftSet = left |> Set.ofSeq
         let rightSet = right |> Set.ofSeq
-        let removed = leftSet - rightSet
-        let added = rightSet - leftSet
-        let same = Set.intersect leftSet rightSet
+        let remove = leftSet - rightSet
+        let add = rightSet - leftSet
+        let update = Set.intersect leftSet rightSet
 
         {
-            remove = removed |> Set.toList
-            update =  same |> Set.toList
-            add = added |> Set.toList
+            remove = remove |> Set.toList
+            update =  update |> Set.toList
+            add = add |> Set.toList
         }
         
     /// A map of filename names without extension to their extensions
@@ -54,8 +55,10 @@ module Diff =
         let sourceStemExtMap = source.files |> StemExtMap.ofFileNames
         let destinationStemExtMap = destination.files |> StemExtMap.ofFileNames
 
-        let files = setDiff sourceStemExtMap.stemNames destinationStemExtMap.stemNames
-        let directories = setDiff source.directories destination.directories
+        // note: we need to apply the setDiff in reverse, because we need to express
+        // how we get the destination on par with the source!
+        let files = setDiff destinationStemExtMap.stemNames sourceStemExtMap.stemNames
+        let directories = setDiff destination.directories source.directories
         {
             source = source.path
             destination = destination.path
