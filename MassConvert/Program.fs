@@ -64,7 +64,7 @@ module Main =
         match startupArgs.mode with
         | Mode.DryRun ->
             composition.print()
-            |> Seq.iter (printf "%s")
+            |> Seq.iter (printfn "%s")
         | Mode.Convert ->
             failwithf "--convert unsupported right now."
         | _ -> failwith "internal error"
