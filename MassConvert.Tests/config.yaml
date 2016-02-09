@@ -8,4 +8,4 @@ destination:
     purge: None
 
 command:
-    template: 'ffmpeg -i "{inputFile}" -ar 8000 -ac 1 -acodec pcm_s161e -f s161e "{outputFile}"'
+    template: 'ffmpeg -i {inputFile} -ar 8000 -ac 1 -acodec pcm_s161e -f s161e {outputFile}'
