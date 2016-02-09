@@ -50,27 +50,27 @@ module Director =
     type Action = 
         | TryRemoveFile of Path        
         | TryRemoveDir of Path
-        | ConvertCommand of inputFile: Path * outputFile: Path * commandLine: string
+        | ConvertCommand of inputFile: Path * tmpFile: Path * outputFile: Path * commandLine: string
         with 
         member this.string = 
             match this with
             | TryRemoveFile p -> sprintf "- %s" p.value
             | TryRemoveDir p -> sprintf "- %s (dir)" p.value
-            | ConvertCommand (_, _, cmdLine) -> "! " + cmdLine
+            | ConvertCommand (_, _, _, cmdLine) -> "! " + cmdLine
 
     let private quotePath (path: string) = 
         if path.Contains("\"") || path.Contains("\\") then
             path |> failwithf "%s: failed to quote this path, it already contains a quote or backslashes"
         "\"" + path + "\""
 
-    let private args (inputFile: Path) (outputFile: Path) = 
+    let private args (inputFile: Path) (tmpFile: Path) = 
         // note: we want the paths to be quoted by default, so that space characters
         // don't lead to nasty surprises.
         [
             "inputFile", inputFile.value |> quotePath
-            "outputFile", outputFile.value |> quotePath
+            "outputFile", tmpFile.value |> quotePath
             "rawInputFile", inputFile.value
-            "rawOutputFile", outputFile.value
+            "rawOutputFile", tmpFile.value
         ]
         |> Template.Arguments.ofList
 
@@ -91,9 +91,10 @@ module Director =
                         | ConvertFile (stem, srcExt, dstExt) -> 
                             let inputFile = src |> Path.extend (stem + srcExt.value)
                             let outputFile = dst |> Path.extend (stem + dstExt.value)
-                            let args = args inputFile outputFile
+                            let tmpFile = dst |> Path.extend (stem + dstExt.value + ".tmp")
+                            let args = args inputFile tmpFile
                             let commandLine = args.format commandLineTemplate
-                            ConvertCommand (inputFile, outputFile, commandLine)
+                            ConvertCommand (inputFile, tmpFile, outputFile, commandLine)
         ]
             
           
