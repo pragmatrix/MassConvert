@@ -1,6 +1,8 @@
 ﻿namespace MassConvert.Core
 
+open System
 open System.IO
+open System.Diagnostics
 
 open FunToolbox.FileSystem
 
@@ -8,7 +10,6 @@ open Director
 
 /// Runs actions.
 module Player = 
-    open System.Diagnostics
 
     type ActionResult = 
         | ActionError of string * exn
@@ -56,9 +57,15 @@ module Player =
                 Directory.Delete(p.value)
             | TryRemoveFile p -> 
                 File.Delete(p.value)
-            | ConvertCommand (_, outputFile, commandLine) ->
+            | ConvertCommand (inputFile, outputFile, commandLine) ->
+                let inputFileDate = File.GetLastWriteTimeUtc(inputFile.value)
+                if inputFileDate > DateTime.UtcNow then
+                    failwith "input file's modification date is in the future"
                 outputFile |> Path.ensureDirectoryOfPathExists 
                 runCommand commandLine
+                let outputFileDate = File.GetLastWriteTimeUtc(outputFile.value)
+                if outputFileDate <= inputFileDate then
+                    failwith "output file was not touched by the command"
         |> act ctx
 
     // note: we play lazy :)
