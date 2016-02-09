@@ -20,13 +20,15 @@ type Arguments =
     | Convert
     | Brave
     | Silent
+    | Run
     with 
         interface IArgParserTemplate with
             member s.Usage = 
                 match s with
                 | Config _ -> "specify a configuration file"
-                | Convert -> "run the conversion, don't do a dry-run"
+                | Convert -> "do the conversion, don't do a dry-run"
                 | Brave -> "be brave, don't halt on errors"
+                | Run -> "don't walk, run"
                 | Silent -> "don't be chatty, don't show what's being done"
 
 type Mode = 
@@ -37,6 +39,10 @@ type Character =
     | Coward
     | Brave
 
+type Speed = 
+    | Walk
+    | Run
+
 type Chattiness = 
     | Verbose
     | Silent
@@ -45,6 +51,7 @@ type StartupArguments = {
     configFile: Path
     mode: Mode
     character: Character
+    speed: Speed
     chattiness: Chattiness
 } with
     static member fromCommandLine currentDir argv = 
@@ -53,20 +60,27 @@ type StartupArguments = {
         let configFile = result.GetResult(<@ Config @>) |> (fun p -> currentDir |> Path.extend p)
         let convert = result.Contains(<@ Arguments.Convert @>)
         let brave = result.Contains(<@ Arguments.Brave @>)
+        let run = result.Contains(<@ Arguments.Run @>)
         let silent = result.Contains(<@ Arguments.Silent @>)
 
         let mode = if convert then Mode.Convert else Mode.DryRun
         let character = if brave then Brave else Coward
+        let speed = if run then Run else Walk
         let chattiness = if silent then Silent else Verbose
+
         {
             configFile = configFile
             mode = mode
             character = character
+            speed = speed
             chattiness = chattiness
         }
 
 
 module Main =
+    open System.Threading
+
+    let WalkingDelayAfterEachAction = TimeSpan.FromSeconds(1.)
 
     let readConfiguration (args: StartupArguments) : Configuration =
         let ser = Serializer()
@@ -78,6 +92,17 @@ module Main =
     let protectedMain argv = 
         let currentDir = Path.currentDirectory()
         let startupArgs = StartupArguments.fromCommandLine currentDir argv
+
+        if startupArgs.chattiness = Verbose then
+            if startupArgs.mode = DryRun then
+                printfn "info: operating dry, use --convert to actually do something"
+            if startupArgs.character = Coward then
+                printfn "info: operating as a coward, use --brave to avoid stopping at the first error"
+            if startupArgs.speed = Walk then
+                printfn "info: operating at heavily reduced speed, use --run to stop walking"
+            if startupArgs.chattiness = Verbose then
+                printfn "info: operating with verbose chattiness, use --silent to avoid too much talking (and the annoying info lines)"
+
         let config = startupArgs |> readConfiguration
         let actions = 
             JobTree.forDirectory config config.source.path config.destination.path
@@ -88,15 +113,17 @@ module Main =
         | Mode.DryRun ->
             let results = actions |> Player.play (fun a -> a.string)
             results |> Seq.iter (printfn "%s")
+
         | Mode.Convert ->
-            
             let player = 
-                match startupArgs.chattiness with
-                | Silent -> Player.fileSystemPlayer
-                | Verbose ->
                 fun (action: Director.Action) ->
-                    printfn "%s" action.string
-                    Player.fileSystemPlayer action
+                    if startupArgs.chattiness = Verbose then
+                        printfn "%s" action.string
+                    let r = Player.fileSystemPlayer action
+                    match startupArgs.speed with
+                    | Walk -> Thread.Sleep(WalkingDelayAfterEachAction)
+                    | Run -> ()
+                    r
 
             let processActionResult result = 
                 match result with
