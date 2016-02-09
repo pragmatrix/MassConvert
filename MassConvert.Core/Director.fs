@@ -91,7 +91,7 @@ module Director =
                         | ConvertFile (stem, srcExt, dstExt) -> 
                             let inputFile = src |> Path.extend (stem + srcExt.value)
                             let outputFile = dst |> Path.extend (stem + dstExt.value)
-                            let tmpFile = dst |> Path.extend (stem + dstExt.value + ".tmp")
+                            let tmpFile = dst |> Path.extend (stem + dstExt.value + ".mc.tmp")
                             let args = args inputFile tmpFile
                             let commandLine = args.format commandLineTemplate
                             ConvertCommand (inputFile, tmpFile, outputFile, commandLine)

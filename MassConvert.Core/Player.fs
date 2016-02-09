@@ -67,9 +67,8 @@ module Player =
                 File.Delete(tmpFile.value)
                 File.Delete(outputFile.value)
                 runCommand commandLine
-                let tmpFileDate = File.GetLastWriteTimeUtc(tmpFile.value)
-                if tmpFileDate <= inputFileDate then
-                    failwith "output file was not touched by the command"
+                if (not <| File.Exists(tmpFile.value)) then
+                    failwith "output file was not created by the command"
                 File.Move(tmpFile.value, outputFile.value)
         |> act ctx
 
