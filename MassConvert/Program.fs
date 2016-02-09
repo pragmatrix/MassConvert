@@ -81,7 +81,7 @@ module Main =
             results |> Seq.iter (printfn "%s")
         | Mode.Convert ->
             let player = Player.fileSystemPlayer config.command.template
-            for result in actions |> Player.play player do
+            let processActionResult result = 
                 match result with
                 | ActionError (context, e) ->
                     printfn "Error: %s\n  %s" e.Message context
@@ -89,6 +89,10 @@ module Main =
                     | Coward -> failwith "I'm a coward and stop at the first error, make me brave with --brave."
                     | Brave -> ()
                 | ActionSuccess -> ()
+
+            actions 
+            |> Player.play player
+            |> Seq.iter processActionResult
 
     [<EntryPoint>]
     let main argv = 
