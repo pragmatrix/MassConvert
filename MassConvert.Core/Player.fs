@@ -49,6 +49,17 @@ module Player =
         if proc.ExitCode <> 0 then
             failwithf "command failed with exit code %d" proc.ExitCode
 
+    let private tryToRemoveCorruptOutputFile (outputFile: Path) =
+        try
+            // first try to delete it!
+            File.Delete(outputFile.value)
+        with _ ->
+        // if deleting did not work, try to move it away!
+        try
+            File.Move(outputFile.value, (outputFile |> Path.extend ".corrupt").value)
+        with _ ->
+            ()
+
     let fileSystemPlayer (action: Action) : ActionResult = 
         let ctx() = action.string
         fun () ->
@@ -61,8 +72,14 @@ module Player =
                 let inputFileDate = File.GetLastWriteTimeUtc(inputFile.value)
                 if inputFileDate > DateTime.UtcNow then
                     failwith "input file's modification date is in the future"
-                outputFile |> Path.ensureDirectoryOfPathExists 
-                runCommand commandLine
+                outputFile |> Path.ensureDirectoryOfPathExists
+                try
+                    runCommand commandLine
+                with _ ->
+                    let outputFileDate = File.GetLastWriteTimeUtc(outputFile.value)
+                    if outputFileDate > inputFileDate then
+                        tryToRemoveCorruptOutputFile(outputFile)
+                    reraise()
                 let outputFileDate = File.GetLastWriteTimeUtc(outputFile.value)
                 if outputFileDate <= inputFileDate then
                     failwith "output file was not touched by the command"
