@@ -50,9 +50,31 @@ module Director =
     type Action = 
         | TryRemoveFile of Path        
         | TryRemoveDir of Path
-        | ConvertCommand of inputFile: Path * outputFile: Path
+        | ConvertCommand of inputFile: Path * outputFile: Path * commandLine: string
+        with 
+        member this.string = 
+            match this with
+            | TryRemoveFile p -> sprintf "- %s" p.value
+            | TryRemoveDir p -> sprintf "- %s (dir)" p.value
+            | ConvertCommand (_, _, cmdLine) -> "! " + cmdLine
 
-    let compositionToActions (composition: Composition) = 
+    let private quotePath (path: string) = 
+        if path.Contains("\"") || path.Contains("\\") then
+            path |> failwithf "%s: failed to quote this path, it already contains a quote or backslashes"
+        "\"" + path + "\""
+
+    let private args (inputFile: Path) (outputFile: Path) = 
+        // note: we want the paths to be quoted by default, so that space characters
+        // don't lead to nasty surprises.
+        [
+            "inputFile", inputFile.value |> quotePath
+            "outputFile", outputFile.value |> quotePath
+            "rawInputFile", inputFile.value
+            "rawOutputFile", outputFile.value
+        ]
+        |> Template.Arguments.ofList
+
+    let compositionToActions (commandLineTemplate: string) (composition: Composition) = 
         let environment = composition.environment
 
         [
@@ -67,7 +89,11 @@ module Director =
                         | PurgeFile fn -> 
                             TryRemoveFile (dst |> Path.extend fn.string)
                         | ConvertFile (stem, srcExt, dstExt) -> 
-                            ConvertCommand (src |> Path.extend (stem + srcExt.value), dst |> Path.extend (stem + dstExt.value))
+                            let inputFile = src |> Path.extend (stem + srcExt.value)
+                            let outputFile = dst |> Path.extend (stem + dstExt.value)
+                            let args = args inputFile outputFile
+                            let commandLine = args.format commandLineTemplate
+                            ConvertCommand (inputFile, outputFile, commandLine)
         ]
             
           
