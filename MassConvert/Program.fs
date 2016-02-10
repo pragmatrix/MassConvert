@@ -131,7 +131,7 @@ module Main =
             | Verbose -> f()
             | Silent -> ()
 
-        ifVerbose (fun () -> printfn "==== scanning '%s'" path.string)
+        ifVerbose (fun () -> printfn "==== scanning '%s'" ("/" + path.string))
 
         let actions = 
             JobBuilder.forRelativePath config path
@@ -142,7 +142,7 @@ module Main =
         | [||] ->
             ifVerbose (fun () -> printfn "==== nothing to do")
         | actions ->
-            ifVerbose (fun () -> printfn "==== processing %d action(s)" actions.Length)
+            ifVerbose (fun () -> printfn "==== processing %d change(s)" actions.Length)
             actions |> processActions startupArgs config
 
     let processWatchEvent (startupArgs: StartupArguments) (config: Configuration) (event: Watcher.WatchEvent) = 
