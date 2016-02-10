@@ -159,7 +159,7 @@ module Main =
                     |> failwithf "destination path does not exist (required for dry runs):\n  %s"
             | Convert ->
                 config.destination.path
-                |> Path.ensureDirectoryOfPathExists
+                |> Path.ensureDirectoryExists
             
         // start up watcher before scanning the directory, so that we
         // don't miss any changes while we scan.
