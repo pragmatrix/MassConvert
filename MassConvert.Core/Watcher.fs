@@ -15,8 +15,10 @@ module Watcher =
         | Deleted of string
         | Renamed of string * string
 
-    let watch (path: Path) (filePattern: GlobPattern) (notify: WatchEvent -> unit) : IDisposable = 
-        let watcher = new FileSystemWatcher(path.value, filePattern.string)
+    let watch (path: Path) (notify: WatchEvent -> unit) : IDisposable = 
+        // note that the pattern in the second argument is also applied to directories, so we
+        // can't use it and watch every change for now.
+        let watcher = new FileSystemWatcher(path.value)
         watcher.IncludeSubdirectories <- true
         watcher.NotifyFilter <- NotifyFilters.DirectoryName ||| NotifyFilters.FileName ||| NotifyFilters.LastWrite
         // set internal buffer size to the maximum size possible.

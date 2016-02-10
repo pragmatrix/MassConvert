@@ -186,7 +186,7 @@ module Main =
         // start up watcher before scanning the directory, so that we
         // don't miss any changes while we scan.
         let queue = Synchronized.Queue<Watcher.WatchEvent>()
-        use watcher = Watcher.watch config.source.path config.source.pattern queue.enqueue
+        use watcher = Watcher.watch config.source.path queue.enqueue
 
         processRelativePath startupArgs config RelativePath.empty
         
