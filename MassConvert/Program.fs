@@ -148,6 +148,19 @@ module Main =
         | NotWatching
 
     let processAndWatch (startupArgs: StartupArguments) (config: Configuration) =
+
+        do
+            let destPath = config.destination.path 
+        
+            match startupArgs.mode with
+            | DryRun ->
+                if not <| Directory.Exists(destPath.value) then
+                    destPath.value
+                    |> failwithf "destination path does not exist (required for dry runs):\n  %s"
+            | Convert ->
+                config.destination.path
+                |> Path.ensureDirectoryOfPathExists
+            
         // start up watcher before scanning the directory, so that we
         // don't miss any changes while we scan.
         let queue = Synchronized.Queue<Watcher.WatchEvent>()
