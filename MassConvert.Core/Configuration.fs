@@ -80,7 +80,7 @@ type Configuration = {
                 
             destination = 
                 {
-                    path = destination|> parse "path" parseDir
+                    path = destination |> parse "path" parseDir
                     extension = destination |> parse "extension" FileExtension.parse
                     purge = destination |> parse "purge" PurgeMode.parse
                 }
