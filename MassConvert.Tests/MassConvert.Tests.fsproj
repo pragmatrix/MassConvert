@@ -51,6 +51,7 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="MiscTests.fs" />
     <Compile Include="StartupTests.fs" />
     <None Include="config.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

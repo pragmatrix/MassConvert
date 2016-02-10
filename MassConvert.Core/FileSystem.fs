@@ -65,7 +65,7 @@ type RelativePath = RelativePath of string list
             let dir, name = Path.GetDirectoryName(str), Path.GetFileName(str)
             match dir with
             | null -> str |> failwithf "%s: expected to be a relative path"
-            | "" -> soFar
+            | "" -> name::soFar |> List.rev
             | dir -> ofString (name::soFar) dir
 
         ofString [] str |> RelativePath         
