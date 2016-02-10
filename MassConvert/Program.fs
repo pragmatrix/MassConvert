@@ -5,6 +5,7 @@ open System.IO
 open System.Collections.Generic
 open System.Diagnostics
 
+open FunToolbox
 open FunToolbox.FileSystem
 
 open Argu
@@ -12,7 +13,6 @@ open SharpYaml.Serialization
 
 open MassConvert.Core
 
-open JobCreator
 open Player
 
 type Arguments = 
@@ -21,6 +21,7 @@ type Arguments =
     | Brave
     | Silent
     | Run
+    | Watch
     with 
         interface IArgParserTemplate with
             member s.Usage = 
@@ -30,6 +31,7 @@ type Arguments =
                 | Brave -> "be brave, don't halt on errors"
                 | Run -> "don't walk, run"
                 | Silent -> "don't be chatty, don't show what's being done"
+                | Watch -> "watch the files and trigger conversions as soon they happen"
 
 type Mode = 
     | DryRun
@@ -53,6 +55,7 @@ type StartupArguments = {
     character: Character
     speed: Speed
     chattiness: Chattiness
+    watch: bool
 } with
     static member fromCommandLine currentDir argv = 
         let parser = ArgumentParser.Create<Arguments>()
@@ -62,6 +65,7 @@ type StartupArguments = {
         let brave = result.Contains(<@ Arguments.Brave @>)
         let run = result.Contains(<@ Arguments.Run @>)
         let silent = result.Contains(<@ Arguments.Silent @>)
+        let watch = result.Contains(<@ Arguments.Watch @>)
 
         let mode = if convert then Mode.Convert else Mode.DryRun
         let character = if brave then Brave else Coward
@@ -74,6 +78,7 @@ type StartupArguments = {
             character = character
             speed = speed
             chattiness = chattiness
+            watch = watch
         }
 
 
@@ -89,25 +94,10 @@ module Main =
         let values = ser.Deserialize<Dictionary<obj, obj>>(file)
         Configuration.fromDictionary configDir values
 
-    let protectedMain argv = 
-        let currentDir = Path.currentDirectory()
-        let startupArgs = StartupArguments.fromCommandLine currentDir argv
-
-        if startupArgs.chattiness = Verbose then
-            if startupArgs.mode = DryRun then
-                printfn "info: operating dry, use --convert to actually do something"
-            if startupArgs.character = Coward then
-                printfn "info: operating as a coward, use --brave to avoid stopping at the first error"
-            if startupArgs.speed = Walk then
-                printfn "info: operating at heavily reduced speed, use --run to stop walking"
-            if startupArgs.chattiness = Verbose then
-                printfn "info: operating with verbose chattiness, use --silent to avoid too much talking (and the annoying info lines)"
-
-        let config = startupArgs |> readConfiguration
+    let processRelativePath (startupArgs: StartupArguments) (config: Configuration) (path: RelativePath) = 
         let actions = 
-            JobTree.forDirectory config config.source.path config.destination.path
-            |> Director.composeFromJobTree
-            |> Director.compositionToActions config.command.template
+            JobBuilder.forRelativePath config path
+            |> ActionBuilder.fromJobs config
 
         match startupArgs.mode with
         | Mode.DryRun ->
@@ -116,7 +106,7 @@ module Main =
 
         | Mode.Convert ->
             let player = 
-                fun (action: Director.Action) ->
+                fun (action: ActionBuilder.Action) ->
                     if startupArgs.chattiness = Verbose then
                         printfn "%s" action.string
                     let r = Player.fileSystemPlayer action
@@ -138,6 +128,78 @@ module Main =
             |> Player.play player
             |> Seq.iter processActionResult
 
+    let processWatchEvent (startupArgs: StartupArguments) (config: Configuration) (event: Watcher.WatchEvent) = 
+        assert(startupArgs.watch = true)
+        let processName name = 
+            let path = RelativePath.parse name
+            processRelativePath startupArgs config path
+
+        match event with
+        | Watcher.Error _ -> failwith "internal error"
+        | Watcher.Created name -> processName name // Nested
+        | Watcher.Changed name -> processName name // Flat
+        | Watcher.Deleted name -> processName name // Nested
+        | Watcher.Renamed (oldName, name) ->
+            processName oldName // Nested
+            processName name // Nested
+
+    type ProcessingResult = 
+        | WatcherCrashed of exn
+        | NotWatching
+
+    let processAndWatch (startupArgs: StartupArguments) (config: Configuration) =
+        // start up watcher before scanning the directory, so that we
+        // don't miss any changes while we scan.
+        let queue = Synchronized.Queue<Watcher.WatchEvent>()
+        use watcher = Watcher.watch config.source.path config.source.pattern queue.enqueue
+
+        processRelativePath startupArgs config RelativePath.empty
+        
+        if not startupArgs.watch then 
+            NotWatching
+        else
+
+        let rec watchLoop() = 
+            let event = queue.dequeue()
+            match event with
+            | Watcher.Error e -> WatcherCrashed e
+            | e ->
+            e |> processWatchEvent startupArgs config 
+            watchLoop()
+        
+        watchLoop()
+
+
+    let protectedMain argv = 
+        let currentDir = Path.currentDirectory()
+        let startupArgs = StartupArguments.fromCommandLine currentDir argv
+
+        if startupArgs.chattiness = Verbose then
+            if startupArgs.mode = DryRun then
+                printfn "info: operating dry, use --convert to actually do something"
+            if startupArgs.character = Coward then
+                printfn "info: operating as a coward, use --brave to avoid stopping at the first error"
+            if startupArgs.speed = Walk then
+                printfn "info: operating at heavily reduced speed, use --run to stop walking"
+            if startupArgs.chattiness = Verbose then
+                printfn "info: operating with verbose chattiness, use --silent to avoid too much talking (and the annoying info lines)"
+
+        let config = startupArgs |> readConfiguration
+
+        let rec processAndWatchLoop() = 
+            match processAndWatch startupArgs config with
+            | NotWatching -> ()
+            | WatcherCrashed e ->
+            printfn "watcher crashed:\n%s" e.Message
+            if startupArgs.character = Coward 
+            then ()
+            else 
+            printfn "rescanning in 2 seconds" 
+            Thread.Sleep(TimeSpan.FromSeconds(2.))
+            processAndWatchLoop()
+
+        processAndWatchLoop()
+    
     [<EntryPoint>]
     let main argv = 
         try

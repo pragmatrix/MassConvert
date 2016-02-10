@@ -51,13 +51,15 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="FileSystem.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="Text.fs" />
     <Compile Include="Scanner.fs" />
     <Compile Include="Diff.fs" />
-    <Compile Include="JobCreator.fs" />
-    <Compile Include="Director.fs" />
+    <Compile Include="JobBuilder.fs" />
+    <Compile Include="ActionBuilder.fs" />
     <Compile Include="Player.fs" />
+    <Compile Include="Watcher.fs" />
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
