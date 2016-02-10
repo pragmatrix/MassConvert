@@ -94,11 +94,7 @@ module Main =
         let values = ser.Deserialize<Dictionary<obj, obj>>(file)
         Configuration.fromDictionary configDir values
 
-    let processRelativePath (startupArgs: StartupArguments) (config: Configuration) (path: RelativePath) = 
-        let actions = 
-            JobBuilder.forRelativePath config path
-            |> ActionBuilder.fromJobs config
-
+    let processActions (startupArgs: StartupArguments) (config: Configuration) (actions: ActionBuilder.Action seq) = 
         match startupArgs.mode with
         | Mode.DryRun ->
             let results = actions |> Player.play (fun a -> a.string)
@@ -127,6 +123,27 @@ module Main =
             actions 
             |> Player.play player
             |> Seq.iter processActionResult
+
+    let processRelativePath (startupArgs: StartupArguments) (config: Configuration) (path: RelativePath) = 
+
+        let ifVerbose f = 
+            match startupArgs.chattiness with
+            | Verbose -> f()
+            | Silent -> ()
+
+        ifVerbose (fun () -> printfn "==== scanning '%s'" path.string)
+
+        let actions = 
+            JobBuilder.forRelativePath config path
+            |> ActionBuilder.fromJobs config
+            |> List.toArray
+
+        match actions with
+        | [||] ->
+            ifVerbose (fun () -> printfn "==== nothing to do")
+        | actions ->
+            ifVerbose (fun () -> printfn "==== processing %d action(s)" actions.Length)
+            actions |> processActions startupArgs config
 
     let processWatchEvent (startupArgs: StartupArguments) (config: Configuration) (event: Watcher.WatchEvent) = 
         assert(startupArgs.watch = true)

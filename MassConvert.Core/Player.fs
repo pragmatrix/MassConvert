@@ -73,7 +73,7 @@ module Player =
         |> act ctx
 
     // note: we play lazy :)
-    let play (player: Action -> 'r) (actions: Action list) : 'r seq = 
+    let play (player: Action -> 'r) (actions: Action seq) : 'r seq = 
         actions
         |> Seq.map player
 
