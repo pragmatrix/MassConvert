@@ -13,7 +13,7 @@ type FileExtension = FileExtension of string
     /// Parses a file extension. Expects the string to start with a dot and at least one character after that
     static member parse (ext: string) = 
         if ext.Length < 2 || ext.[0] <> '.' then
-            failwith "%s: no extension, expect '.' at the beginning and at least one character after that"        
+            ext |> failwithf "%s: no extension, expect '.' at the beginning and at least one character after that"        
         FileExtension ext
 
 type FileName = FileName of stem: string * ext: string
@@ -36,11 +36,10 @@ type DirectoryName = DirectoryName of string
     static member parse str =
         match str with
         | "" -> failwith "directory name can not be empty"
-        | str ->
-        DirectoryName str
+        | str -> DirectoryName str
 
 /// Describes a relative path represented as a list of path parts. For performance reasons, the parts are
-/// stored in the reverse order.
+/// stored in reverse order.
 type RelativePath = RelativePath of string list
     with 
     member private this.value = let (RelativePath value) = this in value
@@ -74,8 +73,7 @@ type GlobPattern = GlobPattern of string
     with 
     member private this.value = let (GlobPattern value) = this in value
     member this.string = this.value
-    static member parse str = 
-        GlobPattern str
+    static member parse str = GlobPattern str
     static member all = "*" |> GlobPattern.parse
     static member forExtension (ext: FileExtension) = "*" + ext.string |> GlobPattern.parse
 
