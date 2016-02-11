@@ -88,16 +88,21 @@ module FileSystem =
         let getFiles(path: Path, pattern: GlobPattern) =
             try
                 Directory.GetFiles(path.value, pattern.string)
+                |> Array.map (Path.parse >> Path.name >> FileName.parse)
+                |> Array.toList
+
             with
             | :? UnauthorizedAccessException ->
                 // tbd: log
-                [||]
+                []
 
         let getDirectories(path: Path) = 
             try
                 Directory.GetDirectories(path.value)
+                |> Array.map (Path.parse >> Path.name >> DirectoryName.parse)
+                |> Array.toList
             with
             | :? UnauthorizedAccessException ->
                 // tbd: log
-                [||]
+                []
 

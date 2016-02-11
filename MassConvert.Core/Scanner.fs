@@ -47,20 +47,14 @@ module Scanner =
     let rec scanDirectory (root: Path) (relative: RelativePath) (pattern: GlobPattern) (director: ScanDirector) = 
         let path = relative.mkAbsolute root
 
-        let files = 
-            FileSystem.Permissive.getFiles(path, pattern)
-            |> Array.map (Path.parse >> Path.name >> FileName.parse)
-            |> Array.toList
+        let files = FileSystem.Permissive.getFiles(path, pattern)
 
         let nested = 
             // tbd: we could specifically scan for one nested directory if DirectedScan is not empty.
             if not <| director.shouldScanDirectories() 
             then []
             else
-            let names =
-                FileSystem.Permissive.getDirectories(path)
-                |> Array.map (Path.parse >> Path.name >> DirectoryName.parse)
-                |> Array.toList
+            let names = FileSystem.Permissive.getDirectories(path)
             let scanDirectory (name: DirectoryName) = 
                 name, scanDirectory root (relative.extend name) pattern (director.enter name)
             
