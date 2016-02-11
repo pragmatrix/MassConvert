@@ -1,5 +1,6 @@
 ﻿namespace MassConvert.Core
 
+open System
 open System.IO
 open FunToolbox.FileSystem
 
@@ -40,7 +41,6 @@ module Scanner =
 
         static member ScanAll = 
             DirectedScan []
-    
 
     /// Returns the files and directories that are contained in the given directory. The files are filtered by 
     /// the glob pattern.
@@ -48,7 +48,7 @@ module Scanner =
         let path = relative.mkAbsolute root
 
         let files = 
-            Directory.GetFiles(path.value, pattern.string)
+            FileSystem.Permissive.getFiles(path, pattern)
             |> Array.map (Path.parse >> Path.name >> FileName.parse)
             |> Array.toList
 
@@ -58,7 +58,7 @@ module Scanner =
             then []
             else
             let names =
-                Directory.GetDirectories(path.value)
+                FileSystem.Permissive.getDirectories(path)
                 |> Array.map (Path.parse >> Path.name >> DirectoryName.parse)
                 |> Array.toList
             let scanDirectory (name: DirectoryName) = 

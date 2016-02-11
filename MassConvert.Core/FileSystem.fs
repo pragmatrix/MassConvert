@@ -79,3 +79,25 @@ type GlobPattern = GlobPattern of string
 
     // more:
     // https://github.com/mganss/Glob.cs
+
+module FileSystem = 
+
+    /// Permissive file system functions that try to swallow errors when it makes sense.
+    module Permissive =
+
+        let getFiles(path: Path, pattern: GlobPattern) =
+            try
+                Directory.GetFiles(path.value, pattern.string)
+            with
+            | :? UnauthorizedAccessException ->
+                // tbd: log
+                [||]
+
+        let getDirectories(path: Path) = 
+            try
+                Directory.GetDirectories(path.value)
+            with
+            | :? UnauthorizedAccessException ->
+                // tbd: log
+                [||]
+
