@@ -72,7 +72,7 @@ module Diff =
         let sourceMap = source.nested |> Map.ofList
         let destinationMap = destination.nested |> Map.ofList
 
-        // for the nested directoies that needs an update, we recurse
+        // for the nested directories that need an update, we recurse
         let nestedUpdated = 
             directories.update
             |> List.map (fun dn -> dn, scanResults sourceMap.[dn] destinationMap.[dn])

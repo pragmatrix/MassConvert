@@ -3,7 +3,7 @@
 open System.IO
 open FunToolbox.FileSystem
 
-/// Scans directories for files and sub directories.
+/// Scans directories for files and subdirectories.
 module Scanner = 
 
     type ScanResult = {
@@ -20,8 +20,8 @@ module Scanner =
             }   
 
     type ScanDirector = 
-        /// A directed scans the elements specified and everything below them. Scanning stops
-        /// as soon first element can not be located
+        /// A directed scan scans the names specified and everything below them. Scanning stops
+        /// as soon the first name can not be located.
         | DirectedScan of string list
         with
         member this.shouldScanDirectories() = true
@@ -75,10 +75,11 @@ module Scanner =
             nested = nested
         }
 
-    /// Find a relative directory below rootLeft and rootRight that _is_ or contains the element. 
+    /// Find a relative directory below rootLeft and rootRight that _is_ or contains the element specified by
+    /// the path.
     /// The element can point to a directory, a file or may not existing at all. If roota / rootb are not 
     /// existing directories, this method fails.
-    /// Returns the relative fragments that points to the common root directory.
+    /// Returns the relative path that points to the common root directory.
     let rec findCommonRelativePath (rootLeft: Path) (rootRight: Path) (path: RelativePath) : RelativePath =
         let left = path.mkAbsolute rootLeft
         let right = path.mkAbsolute rootRight
@@ -88,7 +89,7 @@ module Scanner =
         match path.isEmpty with
         | true -> failwithf "can not find a common root, at least one of the root paths does not exist:\nleft: %s\nright: %s" rootLeft.value rootRight.value
         | false ->
-        findCommonRelativePath rootLeft rootRight (path.parent)
+        findCommonRelativePath rootLeft rootRight path.parent
 
     
         
