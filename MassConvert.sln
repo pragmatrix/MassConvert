@@ -3,6 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{9253E0FF-3DB6-4304-AE8B-416E5AE4BB5D}"
+	ProjectSection(SolutionItems) = preProject
+		paket.dependencies = paket.dependencies
+	EndProjectSection
+EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MassConvert", "MassConvert\MassConvert.fsproj", "{A5795D49-3C5E-4038-B9BE-DEDCC4B37146}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MassConvert.Core", "MassConvert.Core\MassConvert.Core.fsproj", "{17902466-567C-4C0C-BE39-EA85A4E4AC17}"

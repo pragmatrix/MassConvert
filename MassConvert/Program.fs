@@ -22,16 +22,15 @@ type Arguments =
     | Silent
     | Run
     | Watch
-    with 
-        interface IArgParserTemplate with
-            member s.Usage = 
-                match s with
-                | Config _ -> "specify a configuration file"
-                | Convert -> "do the conversion, don't do a dry-run"
-                | Brave -> "be brave, don't halt on errors"
-                | Run -> "don't walk, run"
-                | Silent -> "don't be chatty, don't show what's being done"
-                | Watch -> "watch the files and trigger conversions as soon they happen"
+    interface IArgParserTemplate with
+        member s.Usage = 
+            match s with
+            | Config _ -> "specify a configuration file"
+            | Convert -> "do the conversion, don't do a dry-run"
+            | Brave -> "be brave, don't halt on errors"
+            | Run -> "don't walk, run"
+            | Silent -> "don't be chatty, don't show what's being done"
+            | Watch -> "watch the files and trigger conversions as soon they happen"
 
 type Mode = 
     | DryRun
